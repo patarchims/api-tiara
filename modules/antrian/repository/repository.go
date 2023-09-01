@@ -691,7 +691,7 @@ func (ar *antrianRepository) GetAllAntrianBillingRanap(ctx context.Context) (res
 }
 
 func (ar *antrianRepository) DeleteAntrianBillingRajal(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianbilingrajal AS a WHERE a.noreg=?"
+	query := "DELETE FROM his.antrianbilingrajal  WHERE noreg=?"
 	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
 	if rs.Error != nil {
 		return res, err
@@ -703,7 +703,7 @@ func (ar *antrianRepository) DeleteAntrianBillingRajal(ctx context.Context, noRe
 }
 
 func (ar *antrianRepository) DeleteAntrianBillingRanap(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianbilingrajal AS a WHERE a.noreg=?"
+	query := "DELETE FROM his.antrianbilingrajal  WHERE noreg=?"
 	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
 	if rs.Error != nil {
 		return res, err
@@ -727,7 +727,7 @@ func (ar *antrianRepository) GetAllAntrianApotik(ctx context.Context) (res []ant
 }
 
 func (ar *antrianRepository) DeleteAntrianApotik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianapotik AS a WHERE a.noreg=?"
+	query := "DELETE FROM his.antrianapotik  WHERE noreg=?"
 	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
 	if rs.Error != nil {
 		return res, err
@@ -751,7 +751,7 @@ func (ar *antrianRepository) GetAllAntrianPoli(ctx context.Context) (res []antri
 }
 
 func (ar *antrianRepository) DeleteAntrianPoli(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianpoli AS a WHERE a.noreg=?"
+	query := "DELETE FROM his.antrianpoli  WHERE noreg=?"
 	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
 	if rs.Error != nil {
 		return res, err
@@ -775,7 +775,7 @@ func (ar *antrianRepository) GetAllAntrianPenmedik(ctx context.Context) (res []a
 }
 
 func (ar *antrianRepository) DeleteAntrianPenMedik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianpenmedik AS a WHERE a.noreg=?"
+	query := "DELETE FROM his.antrianpenmedik  WHERE noreg=?"
 	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
 	if rs.Error != nil {
 		return res, err
