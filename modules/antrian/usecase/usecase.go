@@ -245,3 +245,53 @@ func (au *antrianUseCase) ValidasiDate(ctx context.Context, req string) (isTrue 
 	re := regexp.MustCompile(value)
 	return re.MatchString(req)
 }
+
+func (au *antrianUseCase) RepairAntrian(ctx context.Context) (err error) {
+	// HAPUS ANTRIAN BILLING RAJAL  BACK DATE
+	biling, err := au.antrianRepository.GetAllAntrianBillingRajal(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, V := range biling {
+		au.antrianRepository.DeleteAntrianBillingRajal(ctx, V.Noreg)
+	}
+
+	bilngRnap, err := au.antrianRepository.GetAllAntrianBillingRanap(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, V := range bilngRnap {
+		au.antrianRepository.DeleteAntrianBillingRanap(ctx, V.Noreg)
+	}
+
+	apotik, err := au.antrianRepository.GetAllAntrianApotik(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, V := range apotik {
+		au.antrianRepository.DeleteAntrianApotik(ctx, V.Noreg)
+	}
+
+	poli, err := au.antrianRepository.GetAllAntrianPoli(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, V := range poli {
+		au.antrianRepository.DeleteAntrianPoli(ctx, V.Noreg)
+	}
+
+	penmed, err := au.antrianRepository.GetAllAntrianPenmedik(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, V := range penmed {
+		au.antrianRepository.DeleteAntrianPenMedik(ctx, V.Noreg)
+	}
+
+	return nil
+}

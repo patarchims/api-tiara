@@ -665,3 +665,123 @@ func (ar *antrianRepository) CariPoli(ctx context.Context, kdPoli string) (res a
 	}
 	return res, err
 }
+
+func (ar *antrianRepository) GetAllAntrianBillingRajal(ctx context.Context) (res []antrian.Antrian, err error) {
+	query := "SELECT noreg, tgldaftar  FROM his.antrianbilingrajal AS a WHERE date(a.tgldaftar) != CURDATE()"
+	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) GetAllAntrianBillingRanap(ctx context.Context) (res []antrian.Antrian, err error) {
+	query := "SELECT noreg, tgldaftar  FROM his.antrianbilingranap AS a WHERE date(a.tgldaftar) != CURDATE()"
+	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrianBillingRajal(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
+	query := "DELETE FROM his.antrianbilingrajal AS a WHERE a.noreg=?"
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrianBillingRanap(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
+	query := "DELETE FROM his.antrianbilingrajal AS a WHERE a.noreg=?"
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) GetAllAntrianApotik(ctx context.Context) (res []antrian.Antrian, err error) {
+	query := "SELECT noreg, tgldaftar  FROM his.antrianapotik  AS a WHERE date(a.tgldaftar) != CURDATE()"
+	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrianApotik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
+	query := "DELETE FROM his.antrianapotik AS a WHERE a.noreg=?"
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) GetAllAntrianPoli(ctx context.Context) (res []antrian.Antrian, err error) {
+	query := "SELECT noreg, tgldaftar  FROM his.antrianpoli  AS a WHERE date(a.tgldaftar) != CURDATE() "
+	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrianPoli(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
+	query := "DELETE FROM his.antrianpoli AS a WHERE a.noreg=?"
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) GetAllAntrianPenmedik(ctx context.Context) (res []antrian.Antrian, err error) {
+	query := "SELECT noreg, tgldaftar  FROM his.antrianpenmedik  AS a WHERE date(a.tgldaftar) != CURDATE()"
+	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrianPenMedik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
+	query := "DELETE FROM his.antrianpenmedik AS a WHERE a.noreg=?"
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}

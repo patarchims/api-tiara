@@ -214,6 +214,11 @@ type (
 		Antrian           string  `json:"antrian"`
 		Hargaadministrasi string  `json:"hargaadministrasi"`
 	}
+
+	Antrian struct {
+		Noreg     string
+		Tgldaftar string
+	}
 )
 
 func (AntrianOl) TableName() string {

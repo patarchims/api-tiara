@@ -16,6 +16,8 @@ type AntrianUseCase interface {
 	GetKodeBookingOperasiByNoPeserta(ctx context.Context, req dto.JadwalOperasiPasienRequest) (res map[string]any, err error)
 	AmbilAntrean(ctx context.Context, req dto.GetAntrianRequest, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error)
 	ValidasiDate(ctx context.Context, req string) (isTrue bool)
+
+	RepairAntrian(ctx context.Context) (err error)
 }
 
 // AntrianRepository
@@ -53,4 +55,14 @@ type AntrianRepository interface {
 	CheckKuota(ctx context.Context, tglPeriksa string, idDokter string, kuotaToday int) (isAvailable bool)
 	CheckMedrek(ctx context.Context, noRM string) (dprofilpasien antrian.Dprofilpasien, err error)
 	InsertAntreanMjkn(ctx context.Context, req dto.GetAntrianRequest, detailKTaripDokter antrian.KtaripDokter, kotaHariIni int, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error)
+	GetAllAntrianBillingRajal(ctx context.Context) (res []antrian.Antrian, err error)
+	DeleteAntrianBillingRajal(ctx context.Context, noReg string) (res antrian.Antrian, err error)
+	DeleteAntrianBillingRanap(ctx context.Context, noReg string) (res antrian.Antrian, err error)
+	GetAllAntrianBillingRanap(ctx context.Context) (res []antrian.Antrian, err error)
+	GetAllAntrianApotik(ctx context.Context) (res []antrian.Antrian, err error)
+	DeleteAntrianApotik(ctx context.Context, noReg string) (res antrian.Antrian, err error)
+	GetAllAntrianPoli(ctx context.Context) (res []antrian.Antrian, err error)
+	DeleteAntrianPoli(ctx context.Context, noReg string) (res antrian.Antrian, err error)
+	GetAllAntrianPenmedik(ctx context.Context) (res []antrian.Antrian, err error)
+	DeleteAntrianPenMedik(ctx context.Context, noReg string) (res antrian.Antrian, err error)
 }

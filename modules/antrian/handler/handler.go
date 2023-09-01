@@ -397,3 +397,27 @@ func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("POST AMBIL ANTREAN", response, c, data)
 }
+
+func (ah *AntrianHandler) CheckAntrean(c *gin.Context) {
+	payload := new(dto.ResNoRM)
+	err := c.ShouldBindJSON(&payload)
+	data, _ := json.Marshal(payload)
+
+	if err != nil {
+		response := helper.APIResponseFailure("data tidak boleh ada yang null!", http.StatusCreated)
+		c.JSON(http.StatusCreated, response)
+		telegram.RunFailureMessage("POST AMBIL ANTREAN", response, c, data)
+		return
+	}
+
+	err = ah.AntrianUseCase.RepairAntrian(c)
+
+	if err != nil {
+		response := helper.APIResponseFailure("data gagal diproses", http.StatusCreated)
+		c.JSON(http.StatusCreated, response)
+		return
+	}
+
+	response := helper.APIResponseFailure("Antrian Billing rajal berhasil dihapus", http.StatusOK)
+	c.JSON(http.StatusOK, response)
+}
