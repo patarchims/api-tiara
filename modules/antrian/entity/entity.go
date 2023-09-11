@@ -65,4 +65,6 @@ type AntrianRepository interface {
 	DeleteAntrianPoli(ctx context.Context, noReg string) (res antrian.Antrian, err error)
 	GetAllAntrianPenmedik(ctx context.Context) (res []antrian.Antrian, err error)
 	DeleteAntrianPenMedik(ctx context.Context, noReg string) (res antrian.Antrian, err error)
+	HapusAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error)
+	DeleteAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error)
 }

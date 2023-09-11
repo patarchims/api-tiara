@@ -785,3 +785,35 @@ func (ar *antrianRepository) DeleteAntrianPenMedik(ctx context.Context, noReg st
 	}
 	return res, err
 }
+
+func (ar *antrianRepository) HapusAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error) {
+	query := `
+			SELECT  * FROM ` + table + ` 
+			WHERE id = ? 
+		`
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}
+
+func (ar *antrianRepository) DeleteAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error) {
+	query := `
+			DELETE  * FROM ` + table + ` 
+			WHERE id = ? 
+		`
+	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
+	if rs.Error != nil {
+		return res, err
+	}
+
+	if rs.RowsAffected > 0 {
+		return res, err
+	}
+	return res, err
+}

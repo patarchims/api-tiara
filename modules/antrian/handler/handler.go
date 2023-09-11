@@ -421,3 +421,41 @@ func (ah *AntrianHandler) CheckAntrean(c *gin.Context) {
 	response := helper.APIResponseFailure("Antrian Billing rajal berhasil dihapus", http.StatusOK)
 	c.JSON(http.StatusOK, response)
 }
+
+func (ah *AntrianHandler) HapusAntrian(c *gin.Context) {
+	payload := new(dto.ResNoRM)
+	err := c.ShouldBindJSON(&payload)
+	data, _ := json.Marshal(payload)
+
+	if err != nil {
+		response := helper.APIResponseFailure("data tidak boleh ada yang null!", http.StatusCreated)
+		c.JSON(http.StatusCreated, response)
+		telegram.RunFailureMessage("POST AMBIL ANTREAN", response, c, data)
+		return
+	}
+
+	antrian := []string{"antriankmbersalin", "antriankmoperasi", "antrianpenmedik",
+		"antrianpoli", "antrianpolianak", "antrianpolibedah", "antrianpolidalam",
+		"antrianpoligigi", "antrianpolijantung", "antrianpolijiwa", "antrianpolikia",
+		"antrianpolimata", "antrianpoliobgyn", "antrianpoliorto", "antrianpoliparu",
+		"antrianpolisyaraf", "antrianpolitht", "antrianpoliugd", "kbangsalkasur"}
+
+	for _, V := range antrian {
+		data, err := ah.AntrianRepository.HapusAntrian(c, V, payload.Norm)
+
+		if err != nil {
+			response := helper.APIResponseFailure("data gagal diproses", http.StatusCreated)
+			c.JSON(http.StatusCreated, response)
+			return
+		}
+
+		if data.Noreg != "" {
+			datas, _ := ah.AntrianRepository.DeleteAntrian(c, V, payload.Norm)
+			message := fmt.Sprintf("Antrian dengan %s berhasil dihapus ", datas.Noreg)
+
+			response := helper.APIResponse(message, http.StatusOK, "Success", datas)
+			c.JSON(http.StatusOK, response)
+		}
+	}
+
+}
