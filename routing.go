@@ -51,7 +51,7 @@ func (s *Service) RoutingAndListen() {
 	apiProtected.POST("/status-antrean-farmasi", s.FarmasiHandler.StatusAntreanFarmasi)
 
 	// ========================== CHECK ANTREAN
-	apiProtected.POST("/check-antrean", s.AntrianHandler.CheckAntrean)
+	apiPublic.POST("/check-antrean", s.AntrianHandler.CheckAntrean)
 
 	// ========================== CHECK ANTREAN YANG NYANGKUT
 	apiProtected.POST("/hapus-antrean", s.AntrianHandler.HapusAntrian)
