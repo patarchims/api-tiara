@@ -11,10 +11,6 @@ type (
 		Norm string `json:"norm"`
 	}
 
-	ResNoRM struct {
-		Norm string `json:"no_rm"`
-	}
-
 	SisaAntreanResnonse struct {
 		Nomorantrean   string `json:"nomorantrean"`
 		NamaPoli       string `json:"namapoli"`

@@ -4,25 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"vincentcoreapi/modules/farmasi/dto"
-	"vincentcoreapi/modules/farmasi/entity"
-	"vincentcoreapi/modules/farmasi/mapper"
 )
 
-type farmasiUseCase struct {
-	farmasiRepository entity.FarmasiRepository
-	IFarmasiMapper    mapper.IFarmasiMapper
-}
-
-func FarmasiUseCase(fr entity.FarmasiRepository, IFarmasiMapper mapper.IFarmasiMapper) entity.FarmasiUseCase {
-	return &farmasiUseCase{
-		farmasiRepository: fr,
-		IFarmasiMapper:    IFarmasiMapper,
-	}
-}
-
-func (fr *farmasiUseCase) AmbilAntreanFarmasiUsecase(req dto.GetAntreanFarmasiRequest) (res dto.AmbilAntreanFarmasiResponse, err error) {
+func (fr *farmasiUseCase) AmbilAntreanFarmasiUsecaseV2(req dto.GetAntreanFarmasiRequestV2) (res dto.AmbilAntreanFarmasiResponse, err error) {
 	// CEK APAKAH KODE BOOKING ADA DI REKAM ANTERAN OL,
-	cekKodeBooking, err := fr.farmasiRepository.CekKodeBookingRepository(req)
+	cekKodeBooking, err := fr.farmasiRepository.CekKodeBookingRepositoryV2(req)
 
 	if err != nil || cekKodeBooking.NoBook == "" {
 		message := fmt.Sprintf("Kodebooking %s tidak ditemukan", req.Kodebooking)
@@ -30,7 +16,7 @@ func (fr *farmasiUseCase) AmbilAntreanFarmasiUsecase(req dto.GetAntreanFarmasiRe
 	}
 
 	// CEK APAKAH SUDAH PERNAH MENGAMBIL ANTREAN
-	cekAmbilAntran, _ := fr.farmasiRepository.CekKodeBookingAntreanResepRepository(req)
+	cekAmbilAntran, _ := fr.farmasiRepository.CekKodeBookingAntreanResepRepositoryV2(req)
 	if len(cekAmbilAntran.KodeBooking) > 0 {
 		message := fmt.Sprintf("Antrean dengan Kodebooking %s, hanya dapat diambil satu kali", req.Kodebooking)
 		return res, errors.New(message)
@@ -52,9 +38,9 @@ func (fr *farmasiUseCase) AmbilAntreanFarmasiUsecase(req dto.GetAntreanFarmasiRe
 	return mapper, nil
 }
 
-func (fr *farmasiUseCase) StatusAntreanFarmasiUsecase(req dto.GetAntreanFarmasiRequest) (res dto.StatusAntreanFarmasiResponse, err error) {
+func (fr *farmasiUseCase) StatusAntreanFarmasiUsecaseV2(req dto.GetAntreanFarmasiRequestV2) (res dto.StatusAntreanFarmasiResponse, err error) {
 	// CEK APAKAH KODE BOOKING ADA DI ANTREAN RESEP
-	cekKodeBooking, err := fr.farmasiRepository.CekKodeBookingAntreanResepRepository(req)
+	cekKodeBooking, err := fr.farmasiRepository.CekKodeBookingAntreanResepRepositoryV2(req)
 
 	if err != nil || cekKodeBooking.KodeBooking == "" {
 		message := fmt.Sprintf("Kodebooking %s tidak ditemukan", req.Kodebooking)

@@ -9,11 +9,13 @@ import (
 	"vincentcoreapi/modules/user/entity"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type UserHandler struct {
 	UserUseCase    entity.UserUseCase
 	UserRepository entity.UserRepository
+	Logging        *logrus.Logger
 }
 
 // @Summary			Get Token
@@ -35,14 +37,17 @@ func (uh *UserHandler) Login(c *gin.Context) {
 	err := c.ShouldBindHeader(&r)
 
 	data, _ := json.Marshal(r)
+
 	if err != nil {
 		response := helper.APIResponseFailure("Username atau Password Tidak Sesuai", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
+
 		telegram.RunFailureMessage("GET TOKEN", response, c, data)
 		return
 	}
 
-	user, exist := uh.UserRepository.GetByUser(c, r.Username)
+	user, exist := uh.UserRepository.GetByUserRepository(r.Username)
+
 	if !exist {
 		response := helper.APIResponseFailure("Username atau Password Tidak Sesuai", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -58,7 +63,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 	}
 
 	m, _ := rest.GenerateTokenPair(user)
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", m)
+	response := helper.APIResponse("Ok", http.StatusOK, m)
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("GET TOKEN", response, c, data)
 }

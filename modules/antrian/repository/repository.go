@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -25,16 +24,16 @@ func NewAntrianRepository(db *gorm.DB) entity.AntrianRepository {
 	}
 }
 
-func (ar *antrianRepository) CekPoli(ctx context.Context, value string) (isTrue bool, err error) {
+func (ar *antrianRepository) CekPoliRepository(value string) (isTrue bool, err error) {
 	kp := antrian.Kpoli{}
 
 	query := "SELECT bpjs " +
 		"FROM his.kpoli " +
 		"WHERE bpjs = ? " +
 		"LIMIT 1"
-	rs := ar.DB.WithContext(ctx).Raw(query, value).Scan(&kp)
+	rs := ar.DB.Raw(query, value).Scan(&kp)
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", rs.Error)
+		log.Println("[Error Query]", rs.Error)
 	}
 	if rs.RowsAffected > 0 {
 		return true, err
@@ -43,7 +42,7 @@ func (ar *antrianRepository) CekPoli(ctx context.Context, value string) (isTrue 
 	return false, err
 }
 
-func (ar *antrianRepository) DetailPoli(ctx context.Context, params map[string]interface{}) (res map[string]interface{}, err error) {
+func (ar *antrianRepository) DetailPoliRepository(params map[string]interface{}) (res map[string]interface{}, err error) {
 	var result map[string]interface{}
 
 	kp := antrian.Kpoli{}
@@ -52,10 +51,10 @@ func (ar *antrianRepository) DetailPoli(ctx context.Context, params map[string]i
 		"FROM his.kpoli " +
 		"WHERE 1=1 AND bpjs = ? " +
 		"LIMIT 1"
-	rs := ar.DB.WithContext(ctx).Raw(query, params["kodepoli"]).Scan(&kp)
+	rs := ar.DB.Raw(query, params["kodepoli"]).Scan(&kp)
 
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", rs.Error)
+		log.Println("[Error Query]", rs.Error)
 	}
 	if rs.RowsAffected > 0 {
 		m := map[string]interface{}{
@@ -68,36 +67,37 @@ func (ar *antrianRepository) DetailPoli(ctx context.Context, params map[string]i
 	return result, err
 }
 
-func (ar *antrianRepository) LastCalled(ctx context.Context, payload *dto.StatusAntrianRequest) (res antrian.LastCalled, err error) {
+func (ar *antrianRepository) LastCalledRepository(payload *dto.StatusAntrianRequest) (res antrian.LastCalled, err error) {
 
 	query := "SELECT nomorantrean, angkaantrean " +
 		"FROM antrean_ol_pool " +
 		"WHERE 1=1 AND tanggalperiksa = ? AND kodedokter = ? " +
 		"ORDER BY angkaantrean DESC " +
 		"LIMIT 1"
-	rs := ar.DB.WithContext(ctx).Raw(query, payload.TanggalPeriksa, payload.KodeDokter).Scan(&res)
+	rs := ar.DB.Raw(query, payload.TanggalPeriksa, payload.KodeDokter).Scan(&res)
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
+		log.Println("[Error Query]", rs.Error)
 
 	}
 
-	return res, err
+	return res, nil
 }
 
-func (ar *antrianRepository) DetailTaripDokterByMapingAntrol(ctx context.Context, mapingAntrol int) (res antrian.KtaripDokter, err error) {
+func (ar *antrianRepository) DetailTaripDokterByMapingAntrolRepository(mapingAntrol int) (res antrian.KtaripDokter, err error) {
 	query := "SELECT  * FROM his.ktaripdokter WHERE 1=1 AND maping_antrol = ? "
-	rs := ar.DB.WithContext(ctx).Raw(query, mapingAntrol).Scan(&res)
+	rs := ar.DB.Raw(query, mapingAntrol).Scan(&res)
+
 	if rs.Error != nil {
-		return res, err
+		return res, rs.Error
 	}
 	if rs.RowsAffected > 0 {
 		return res, nil
 	}
 
-	return res, err
+	return res, nil
 }
 
-func (ar *antrianRepository) GetKodeDokterRs(ctx context.Context, params map[string]interface{}) (res map[string]interface{}, err error) {
+func (ar *antrianRepository) GetKodeDokterRsRepository(params map[string]interface{}) (res map[string]interface{}, err error) {
 	var result map[string]interface{}
 
 	type ktaripdokter struct {
@@ -108,9 +108,9 @@ func (ar *antrianRepository) GetKodeDokterRs(ctx context.Context, params map[str
 	query := "SELECT iddokter " +
 		"FROM his.ktaripdokter " +
 		"WHERE 1=1 AND maping_antrol = ? "
-	rs := ar.DB.WithContext(ctx).Raw(query, params["kodedokter"]).Scan(&kd.IdDokter)
+	rs := ar.DB.Raw(query, params["kodedokter"]).Scan(&kd.IdDokter)
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
+		log.Println("[Error Query]", rs.Error)
 	}
 	if rs.RowsAffected > 0 {
 		m := map[string]interface{}{
@@ -122,7 +122,7 @@ func (ar *antrianRepository) GetKodeDokterRs(ctx context.Context, params map[str
 	return result, err
 }
 
-func (ar *antrianRepository) JmlAntrean(ctx context.Context, payload *dto.StatusAntrianRequest, kodeDokter string) (res int, err error) {
+func (ar *antrianRepository) JmlAntreanRepository(payload *dto.StatusAntrianRequest, kodeDokter string) (res int, err error) {
 
 	type jmlAntrean struct {
 		Jumlah int `json:"jumlah"`
@@ -132,15 +132,15 @@ func (ar *antrianRepository) JmlAntrean(ctx context.Context, payload *dto.Status
 	query := "SELECT COUNT(*) AS Jumlah " +
 		"FROM antrian_ol " +
 		"WHERE 1=1 AND tgl_periksa = ? AND kd_dokter = ? AND status = 'tunggu' "
-	rs := ar.DB.WithContext(ctx).Raw(query, payload.TanggalPeriksa, kodeDokter).Scan(&ja)
+	rs := ar.DB.Raw(query, payload.TanggalPeriksa, kodeDokter).Scan(&ja)
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
+		log.Println("[Error Query]", rs.Error)
 	}
 
-	return ja.Jumlah, err
+	return ja.Jumlah, nil
 }
 
-func (ar *antrianRepository) GetKodeDokterJadwalRs(ctx context.Context, day string, params map[string]interface{}) (res bool, err error) {
+func (ar *antrianRepository) GetKodeDokterJadwalRsRepository(day string, params map[string]interface{}) (res bool, err error) {
 	type jmlAntrean struct {
 		Jumlah int `json:"jumlah"`
 	}
@@ -150,10 +150,10 @@ func (ar *antrianRepository) GetKodeDokterJadwalRs(ctx context.Context, day stri
 		"FROM his.ktaripdokter " +
 		"WHERE " + day + " = 1 AND maping_antrol = ? "
 
-	rs := ar.DB.WithContext(ctx).Raw(query, params["kodedokter"]).Scan(&ja)
+	rs := ar.DB.Raw(query, params["kodedokter"]).Scan(&ja)
 
 	if rs.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
+		log.Println("[Error Query]", rs.Error)
 	}
 
 	if ja.Jumlah > 0 {
@@ -164,32 +164,28 @@ func (ar *antrianRepository) GetKodeDokterJadwalRs(ctx context.Context, day stri
 
 }
 
-func (ar *antrianRepository) GetMobileJknByKodebooking(ctx context.Context, kodebooking string) (
+func (ar *antrianRepository) GetMobileJknByKodebookingRepository(kodebooking string) (
 	res dto.GetMobileJknByKodebookingDTO, err error) {
 
 	query := `
 		SELECT 
-			a.no_antrian,
-			b.spesialisasi,
-			a.tujuan,
-			b.namadokter,
-			b.maping_antrol,
-			a.tgl_periksa
+			a.no_antrian, b.spesialisasi, a.tujuan,
+			b.namadokter, b.maping_antrol, a.tgl_periksa
 		FROM rekam.antrian_ol a
 		JOIN his.ktaripdokter b ON b.iddokter = a.kd_dokter
 		WHERE no_book = ?
 	`
 
-	result := ar.DB.WithContext(ctx).Raw(query, kodebooking).Scan(&res)
+	result := ar.DB.Raw(query, kodebooking).Scan(&res)
 	if result.Error != nil || res.NoAntrian == "" {
-		log.Println(ctx, "[Error Query]", err)
-		return res, errors.New("antrean dengan kode booking tersebut tidak ditemukan")
+		log.Println("[Error Query]", result.Error)
+		return res, errors.New("Antrean dengan kode booking tersebut tidak ditemukan")
 	}
 
 	return res, nil
 }
 
-func (ar *antrianRepository) GetSisaAntrean(ctx context.Context, req dto.GetSisaAntrianRequest) (
+func (ar *antrianRepository) GetSisaAntreanRepository(req dto.GetSisaAntrianRequest) (
 	res dto.SisaAntreanResnonse, err error) {
 
 	kodeBook := dto.GetMobileJknByKodebookingDTO{}
@@ -200,11 +196,11 @@ func (ar *antrianRepository) GetSisaAntrean(ctx context.Context, req dto.GetSisa
 				WHERE no_book = ?
 			`
 
-	result := ar.DB.WithContext(ctx).Raw(query, req.Kodebooking).Scan(&kodeBook)
+	result := ar.DB.Raw(query, req.Kodebooking).Scan(&kodeBook)
 
 	if result.Error != nil || kodeBook.NoAntrian == "" {
-		log.Println(ctx, "[Error Query]", err)
-		return res, errors.New("antrean dengan kode booking tersebut tidak ditemukan")
+		log.Println("[Error Query]", err)
+		return res, errors.New("Antrean dengan kode booking tersebut tidak ditemukan")
 	}
 
 	type SisaAntrean struct {
@@ -220,11 +216,11 @@ func (ar *antrianRepository) GetSisaAntrean(ctx context.Context, req dto.GetSisa
 	WHERE kd_dokter=SUBSTRING_INDEX((SUBSTRING_INDEX(?,'-',2) ),'-',-1) AND CAST(no_antrian AS SIGNED INTEGER)<CAST(RIGHT(?,3) AS SIGNED INTEGER) AND STATUS='tunggu'
 	AND tgl_periksa=CONCAT(SUBSTRING(SUBSTRING_INDEX(?,'-',-1) ,1,4),'-',SUBSTRING(SUBSTRING_INDEX(?,'-',-1) ,5,2),'-', SUBSTRING(SUBSTRING_INDEX(?,'-',-1) ,7,2))
 	`
-	value := ar.DB.WithContext(ctx).Raw(quers, kodeBook.EstimasiPerPasien, req.Kodebooking, req.Kodebooking, req.Kodebooking, req.Kodebooking, req.Kodebooking).Scan(&sisa)
+	value := ar.DB.Raw(quers, kodeBook.EstimasiPerPasien, req.Kodebooking, req.Kodebooking, req.Kodebooking, req.Kodebooking, req.Kodebooking).Scan(&sisa)
 
 	if value.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
-		return res, errors.New("error query")
+		log.Println("[Error Query]", value.Error)
+		return res, errors.New("Error query")
 	}
 
 	res.Nomorantrean = kodeBook.NoAntrian
@@ -238,25 +234,25 @@ func (ar *antrianRepository) GetSisaAntrean(ctx context.Context, req dto.GetSisa
 	return res, nil
 }
 
-func (ar *antrianRepository) GetAntreanByKodeBooking(ctx context.Context, kodeBooking string) (
+func (ar *antrianRepository) GetAntreanByKodeBookingRepository(kodeBooking string) (
 	antrianOL antrian.AntrianOl, err error) {
 
 	if err = ar.DB.Where("no_book = ?", kodeBooking).Take(&antrianOL).Error; err != nil {
-		return antrianOL, errors.New("antrean tidak ditemukan")
+		return antrianOL, errors.New("Antrean tidak ditemukan")
 	}
 
 	if antrianOL.Status == "batal" {
-		return antrianOL, errors.New("antrean tidak dapat ditemukan atau sudah Dibatalkan")
+		return antrianOL, errors.New("Antrean tidak dapat ditemukan atau sudah Dibatalkan")
 	}
 
 	if antrianOL.Status == "proses" {
-		return antrianOL, errors.New("pasien sudah dilayani antrean tidak dapat dibatalkan")
+		return antrianOL, errors.New("Pasien sudah dilayani antrean tidak dapat dibatalkan")
 	}
 
 	return antrianOL, nil
 }
 
-func (ar *antrianRepository) BatalAntrean(ctx context.Context, kodeBooking, keterangan string) (isSuccessBatal bool) {
+func (ar *antrianRepository) BatalAntreanRepository(kodeBooking, keterangan string) (isSuccessBatal bool) {
 
 	if err := ar.DB.Model(antrian.AntrianOl{}).
 		Where("no_book = ? ", kodeBooking).
@@ -273,16 +269,14 @@ func (ar *antrianRepository) BatalAntrean(ctx context.Context, kodeBooking, kete
 	return true
 }
 
-func (ar *antrianRepository) CheckIn(ctx context.Context, kodeBooking string, waktu int64) (isSuccess bool) {
+func (ar *antrianRepository) CheckInRepository(kodeBooking string, waktu int64) (isSuccess bool) {
 
 	t := time.UnixMilli(waktu)
 	now := t.Format("2006-01-02 15:04:05")
 
 	result := ar.DB.Model(antrian.AntrianOl{}).
 		Where("no_book = ? ", kodeBooking).
-		Updates(antrian.AntrianOl{
-			CheckedIn: now,
-		})
+		Updates(antrian.AntrianOl{CheckedIn: now})
 	if result.Error != nil || result.RowsAffected == 0 {
 		return false
 	}
@@ -290,7 +284,7 @@ func (ar *antrianRepository) CheckIn(ctx context.Context, kodeBooking string, wa
 	return true
 }
 
-func (ar *antrianRepository) CheckPasienDuplikat(ctx context.Context, noka string) (isDuplicate bool) {
+func (ar *antrianRepository) CheckPasienDuplikatRepository(noka string) (isDuplicate bool) {
 
 	antrianOl := antrian.AntrianOl{}
 	if err := ar.DB.Where("noka = ? ", noka).Take(&antrianOl).Error; err != nil {
@@ -300,7 +294,8 @@ func (ar *antrianRepository) CheckPasienDuplikat(ctx context.Context, noka strin
 	return true
 }
 
-func (ar *antrianRepository) InsertPasienBaru(ctx context.Context, pasienBaru antrian.AntrianOl) (isSuccess bool, norm string) {
+func (ar *antrianRepository) InsertPasienBaruRepository(pasienBaru antrian.AntrianOl) (isSuccess bool, norm string) {
+	// pasienBaru.TimeElapsed =  Time.now
 	result := ar.DB.Create(&pasienBaru)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return false, ""
@@ -309,7 +304,7 @@ func (ar *antrianRepository) InsertPasienBaru(ctx context.Context, pasienBaru an
 	return true, "000000"
 }
 
-func (ar *antrianRepository) GetJadwalOperasi(ctx context.Context, tanggalAwal, tanggalAkhir string) (
+func (ar *antrianRepository) GetJadwalOperasiRepository(tanggalAwal, tanggalAkhir string) (
 	jadopOls []antrian.JadopOl, err error) {
 
 	if err = ar.DB.Where("tgl_operasi BETWEEN ? AND ? ", tanggalAwal, tanggalAkhir).
@@ -321,7 +316,7 @@ func (ar *antrianRepository) GetJadwalOperasi(ctx context.Context, tanggalAwal, 
 	return jadopOls, nil
 }
 
-func (ar *antrianRepository) GetKodeBookingOperasiByNoPeserta(ctx context.Context, noPeserta string) (
+func (ar *antrianRepository) GetKodeBookingOperasiByNoPesertaRepository(noPeserta string) (
 	jadopOls []antrian.JadopOl, err error) {
 
 	if err = ar.DB.Where("noka = ? ", noPeserta).
@@ -333,7 +328,7 @@ func (ar *antrianRepository) GetKodeBookingOperasiByNoPeserta(ctx context.Contex
 	return jadopOls, nil
 }
 
-func (ar *antrianRepository) CheckAntrean(ctx context.Context, nomorKartu, tglPeriksa, kodePoli string) (
+func (ar *antrianRepository) CheckAntreanRepository(nomorKartu, tglPeriksa, kodePoli string) (
 	jumlah int64, err error) {
 
 	result := ar.DB.Table("antrian_ol a").
@@ -342,18 +337,18 @@ func (ar *antrianRepository) CheckAntrean(ctx context.Context, nomorKartu, tglPe
 		Where("noka = ?  AND b.bpjs = ? AND  a.status =?", nomorKartu, kodePoli, "tunggu").
 		Count(&jumlah)
 	if result.Error != nil {
-		return jumlah, errors.New("data tidak di temukan")
+		return jumlah, errors.New("Data tidak di temukan")
 	}
 
 	if jumlah > 0 {
-		return jumlah, errors.New("nomor antrean hanya dapat diambil 1 kali pada tanggal yang sama")
+		return jumlah, errors.New("Nomor antrean hanya dapat diambil 1 kali pada tanggal yang sama")
 	}
 
 	return jumlah, nil
 
 }
 
-func (ar *antrianRepository) CheckDokterLibur(ctx context.Context, tglPeriksa string, kodeDokter string) (
+func (ar *antrianRepository) CheckDokterLiburRepository(tglPeriksa string, kodeDokter string) (
 	dokterLiburs antrian.LiburOl, err error) {
 
 	if err = ar.DB.Where("keterangan = ? AND tanggal = ?", kodeDokter, tglPeriksa).Find(&dokterLiburs).Error; err != nil {
@@ -363,11 +358,12 @@ func (ar *antrianRepository) CheckDokterLibur(ctx context.Context, tglPeriksa st
 	return dokterLiburs, nil
 }
 
-func (ar *antrianRepository) CheckJadwalPraktek(ctx context.Context, tglPeriksa string, idDokter string) (
+func (ar *antrianRepository) CheckJadwalPraktekRepository(tglPeriksa string, idDokter string) (
 	jadwal int64, err error) {
 
 	date, _ := time.Parse("2006-01-02", tglPeriksa)
-	// Ubah Format hari menjadi loweercase
+	// Ubah Format hari
+	// menjadi loweercase
 	hari := strings.ToLower(date.Format("Mon"))
 
 	fmt.Println("Hari")
@@ -379,16 +375,16 @@ func (ar *antrianRepository) CheckJadwalPraktek(ctx context.Context, tglPeriksa 
 		WHERE ` + hari + ` = 1 AND iddokter = ?
 	`
 	// JUMLAH
-	result := ar.DB.WithContext(ctx).Raw(query, idDokter).Scan(&jadwal)
+	result := ar.DB.Raw(query, idDokter).Scan(&jadwal)
 	if result.Error != nil {
-		log.Println(ctx, "[Error Query]", err)
+		log.Println("[Error Query]", result.Error)
 		return jadwal, err
 	}
 
 	return jadwal, nil
 }
 
-func (ar *antrianRepository) GetDokterName(ctx context.Context, kodeDokter int) (
+func (ar *antrianRepository) GetDokterNameRepository(kodeDokter int) (
 	dokter antrian.KtaripDokter, err error) {
 
 	if err := ar.DB.Where("maping_antrol = ? ", kodeDokter).Take(&dokter).Error; err != nil {
@@ -398,7 +394,7 @@ func (ar *antrianRepository) GetDokterName(ctx context.Context, kodeDokter int) 
 	return dokter, nil
 }
 
-func (ar *antrianRepository) CheckKuota(ctx context.Context, tglPeriksa string, idDokter string, kuotaToday int) (isAvailable bool) {
+func (ar *antrianRepository) CheckKuotaRepository(tglPeriksa string, idDokter string, kuotaToday int) (isAvailable bool) {
 
 	var jmlhDaftar int64
 	var antrianOl antrian.AntrianOl
@@ -425,7 +421,7 @@ func (ar *antrianRepository) CheckKuota(ctx context.Context, tglPeriksa string, 
 	return true
 }
 
-func (ar *antrianRepository) CheckJamStart(ctx context.Context, tglPeriksa string, kodeDokter int, jamPrakterk string) (jamTutup string) {
+func (ar *antrianRepository) CheckJamStartRepository(tglPeriksa string, kodeDokter int, jamPrakterk string) (jamTutup string) {
 
 	date, _ := time.Parse("2006-01-02", tglPeriksa)
 	number := strings.ToLower(date.Format("Mon"))
@@ -459,7 +455,7 @@ func (ar *antrianRepository) CheckJamStart(ctx context.Context, tglPeriksa strin
 		Jampraktek string
 	}
 	ktaripdokter := Result{}
-	result := ar.DB.WithContext(ctx).Raw(query, kodeDokter, jamPrakterk+"%").Scan(&ktaripdokter)
+	result := ar.DB.Raw(query, kodeDokter, jamPrakterk+"%").Scan(&ktaripdokter)
 
 	if result.Error != nil || ktaripdokter.Jampraktek == "" {
 		return ""
@@ -471,12 +467,11 @@ func (ar *antrianRepository) CheckJamStart(ctx context.Context, tglPeriksa strin
 	return jamTutup
 }
 
-func (ar *antrianRepository) CheckMedrek(ctx context.Context, nik string) (dprofilpasien antrian.Dprofilpasien, err error) {
+func (ar *antrianRepository) CheckMedrekRepository(nik string) (dprofilpasien antrian.Dprofilpasien, err error) {
 
 	query1 := `SELECT *  FROM his.dprofilpasien WHERE nik= ?`
 
-	err = ar.DB.WithContext(ctx).
-		Raw(query1, nik).
+	err = ar.DB.Raw(query1, nik).
 		Scan(&dprofilpasien).Error
 
 	if err != nil {
@@ -486,13 +481,14 @@ func (ar *antrianRepository) CheckMedrek(ctx context.Context, nik string) (dprof
 	return dprofilpasien, nil
 }
 
-func (ar *antrianRepository) InsertAntreanMjkn(ctx context.Context, req dto.GetAntrianRequest, detailKTaripDokter antrian.KtaripDokter, kotaHariIni int, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
+func (ar *antrianRepository) InsertAntreanMjknRepository(req dto.GetAntrianRequest, detailKTaripDokter antrian.KtaripDokter, kotaHariIni int, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
 
-	// TODO : RUMAH SAKIT TIARA PEMATANGSIANTAR
+	// TODO : RS
+	// CHANGE RSHP :> RS HARAPAN
 
 	query1 := `
 		SELECT COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001') AS no_antre,
-			CONCAT('RSTP-', ? ,'-',REPLACE(?,'-',''),COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001')) AS kobook,
+			CONCAT('RSHP-', ? ,'-',REPLACE(?,'-',''),COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001')) AS kobook,
 			? AS date
 		FROM rekam.antrian_ol
 		WHERE tgl_periksa = ?
@@ -505,8 +501,7 @@ func (ar *antrianRepository) InsertAntreanMjkn(ctx context.Context, req dto.GetA
 		Date    string
 	}
 	result1 := Result1{}
-	err = ar.DB.WithContext(ctx).
-		Raw(query1, detailKTaripDokter.Iddokter, req.Tanggalperiksa, req.Tanggalperiksa, req.Tanggalperiksa, detailKTaripDokter.Iddokter).
+	err = ar.DB.Raw(query1, detailKTaripDokter.Iddokter, req.Tanggalperiksa, req.Tanggalperiksa, req.Tanggalperiksa, detailKTaripDokter.Iddokter).
 		Scan(&result1).Error
 
 	if err != nil {
@@ -525,7 +520,7 @@ func (ar *antrianRepository) InsertAntreanMjkn(ctx context.Context, req dto.GetA
 	jumlahAntrian := len(antrians) + 1
 
 	// GET TIME ELAPSED HERE
-	timeElapsed := ar.getTimeElapsed(ctx, req.Tanggalperiksa, strconv.Itoa(req.Kodedokter), int64(detailKTaripDokter.EstimasiPerPasien), int64(jumlahAntrian), detailKTaripDokter)
+	timeElapsed := ar.getTimeElapsed(req.Tanggalperiksa, strconv.Itoa(req.Kodedokter), int64(detailKTaripDokter.EstimasiPerPasien), int64(jumlahAntrian), detailKTaripDokter)
 
 	data2 := antrian.AntrianOl{
 		// SIMPAN DARI DPROFILE PASIEN
@@ -580,7 +575,6 @@ func (ar *antrianRepository) InsertAntreanMjkn(ctx context.Context, req dto.GetA
 	response.Angkaantrean = angkaAntrean
 
 	date, _ := time.Parse("2006-01-02 15:04:05", timeElapsed)
-
 	// LAKUKAN PERUBAHAN ETIMASI DILAYANI
 	theTime := time.Date(date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute(), date.Second(), date.Nanosecond(), time.Local)
 
@@ -600,8 +594,9 @@ func (ar *antrianRepository) InsertAntreanMjkn(ctx context.Context, req dto.GetA
 	return response, nil
 }
 
-// TIMEELAPSED
-func (ar *antrianRepository) getTimeElapsed(ctx context.Context, tglPeriksa, kodeDokterRs string, estimasiPerPasien, jumlahAntrean int64, detailKTaripDokter antrian.KtaripDokter) string {
+// TIMEE
+// LAPSED
+func (ar *antrianRepository) getTimeElapsed(tglPeriksa, kodeDokterRs string, estimasiPerPasien, jumlahAntrean int64, detailKTaripDokter antrian.KtaripDokter) string {
 	date, _ := time.Parse("2006-01-02", tglPeriksa)
 	number := strings.ToLower(date.Format("Mon"))
 
@@ -654,9 +649,10 @@ func (ar *antrianRepository) getTimeElapsed(ctx context.Context, tglPeriksa, kod
 
 }
 
-func (ar *antrianRepository) CariPoli(ctx context.Context, kdPoli string) (res antrian.Kpoli, err error) {
-	query := "SELECT * FROM his.kpoli WHERE bpjs = ? LIMIT 1"
-	rs := ar.DB.WithContext(ctx).Raw(query, kdPoli).Scan(&res)
+func (ar *antrianRepository) CariPoliRepository(kdPoli string) (res antrian.Kpoli, err error) {
+	query := "SELECT * FROM his.kpoli WHERE bpjs = ? " +
+		"LIMIT 1"
+	rs := ar.DB.Raw(query, kdPoli).Scan(&res)
 	if rs.Error != nil {
 		return res, err
 	}
@@ -666,154 +662,27 @@ func (ar *antrianRepository) CariPoli(ctx context.Context, kdPoli string) (res a
 	return res, err
 }
 
-func (ar *antrianRepository) GetAllAntrianBillingRajal(ctx context.Context) (res []antrian.Antrian, err error) {
-	query := "SELECT noreg, tgldaftar  FROM his.antrianbilingrajal AS a WHERE date(a.tgldaftar) != CURDATE()"
-	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
-	if rs.Error != nil {
-		return res, err
+// ============================== PENAMBAHAN FITUR
+// ======================== INSERT PASIEN BARU, KE DPROFILPASIEN
+func (ar *antrianRepository) InsertPasienBaruDprofilePasien(pasienBaru antrian.Dprofilpasien) (res antrian.Dprofilpasien, err error) {
+	result := ar.DB.Create(&pasienBaru).Scan(&res)
+	if result.Error != nil || result.RowsAffected == 0 {
+		return res, result.Error
 	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
+
+	return res, nil
 }
 
-func (ar *antrianRepository) GetAllAntrianBillingRanap(ctx context.Context) (res []antrian.Antrian, err error) {
-	query := "SELECT noreg, tgldaftar  FROM his.antrianbilingranap AS a WHERE date(a.tgldaftar) != CURDATE()"
-	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
+func (ar *antrianRepository) GetNormPasienRepository() (res antrian.IDPasien, err error) {
 
-func (ar *antrianRepository) DeleteAntrianBillingRajal(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianbilingrajal  WHERE noreg=?"
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
+	query := `SELECT COALESCE(LPAD(CONVERT(@last_id :=MAX(id),SIGNED INTEGER)+1,6,0),'000001') AS norm FROM his.dprofilpasien WHERE length(id)=6;`
 
-func (ar *antrianRepository) DeleteAntrianBillingRanap(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianbilingrajal  WHERE noreg=?"
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
+	result := ar.DB.Raw(query).Scan(&res)
 
-func (ar *antrianRepository) GetAllAntrianApotik(ctx context.Context) (res []antrian.Antrian, err error) {
-	query := "SELECT noreg, tgldaftar  FROM his.antrianapotik  AS a WHERE date(a.tgldaftar) != CURDATE()"
-	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) DeleteAntrianApotik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianapotik  WHERE noreg=?"
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) GetAllAntrianPoli(ctx context.Context) (res []antrian.Antrian, err error) {
-	query := "SELECT noreg, tgldaftar  FROM his.antrianpoli  AS a WHERE date(a.tgldaftar) != CURDATE() "
-	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) DeleteAntrianPoli(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianpoli  WHERE noreg=?"
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) GetAllAntrianPenmedik(ctx context.Context) (res []antrian.Antrian, err error) {
-	query := "SELECT noreg, tgldaftar  FROM his.antrianpenmedik  AS a WHERE date(a.tgldaftar) != CURDATE()"
-	rs := ar.DB.WithContext(ctx).Raw(query).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) DeleteAntrianPenMedik(ctx context.Context, noReg string) (res antrian.Antrian, err error) {
-	query := "DELETE FROM his.antrianpenmedik  WHERE noreg=?"
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) HapusAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error) {
-	query := `
-			SELECT  * FROM ` + table + ` 
-			WHERE id = ? 
-		`
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
+	if result.Error != nil {
+		message := fmt.Sprintf("Error %s, Data tidak dapat dieksekusi", result.Error.Error())
+		return res, errors.New(message)
 	}
 
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
-}
-
-func (ar *antrianRepository) DeleteAntrian(ctx context.Context, table string, noReg string) (res antrian.Antrian, err error) {
-	query := `
-			DELETE  * FROM ` + table + ` 
-			WHERE id = ? 
-		`
-	rs := ar.DB.WithContext(ctx).Raw(query, noReg).Scan(&res)
-	if rs.Error != nil {
-		return res, err
-	}
-
-	if rs.RowsAffected > 0 {
-		return res, err
-	}
-	return res, err
+	return res, nil
 }

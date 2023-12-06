@@ -20,10 +20,6 @@ ProxyPassReverse / http://127.0.0.1:8080/
 TransferLog /var/log/apache2/yourdomain_access.log
 ErrorLog /var/log/apache2/yourdomain_error.log
 
-
-
-
-
 	query1 := `
 	SELECT COALESCE(CONCAT(tgl_periksa,' ',?)+INTERVAL ?*(COUNT(*)) MINUTE,CONCAT(?,' ',?)) AS ELAPSE,
 	UNIX_TIMESTAMP(COALESCE(CONCAT(tgl_periksa,' ',?)+INTERVAL ?*(COUNT(*)) MINUTE,CONCAT(?,' ',?)))*1000 AS MILISECOND FROM antrian_ol 
@@ -40,7 +36,7 @@ masuk ke
 vi webapi.service
 [Unit]
 Description=Web Services
-ConditionPathExists=/usr/local/bin/api/vincentcore_api-master
+ConditionPathExists=/usr/local/bin/image-api
 After=network.target
 
 [Service]
@@ -48,8 +44,8 @@ Type=simple
 User=root
 Group=root
 
-WorkingDirectory=/usr/local/bin/api/vincentcore_api-master
-ExecStart=/usr/local/bin/api/vincentcore_api-master/webapi
+WorkingDirectory=/usr/local/bin/image-api
+ExecStart=/usr/local/bin/image-api/webapi
 
 Restart=on-failure
 RestartSec=10

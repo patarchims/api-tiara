@@ -4,29 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	"vincentcoreapi/modules/antrian"
 	"vincentcoreapi/modules/antrian/dto"
-	"vincentcoreapi/modules/antrian/entity"
-	"vincentcoreapi/modules/antrian/mapper"
 )
 
-type antrianUseCase struct {
-	antrianRepository entity.AntrianRepository
-	IAntrianMapper    mapper.IAntrianMapper
-}
-
-func NewAntrianUseCase(ar entity.AntrianRepository, IAntrianMapper mapper.IAntrianMapper) entity.AntrianUseCase {
-	return &antrianUseCase{
-		antrianRepository: ar,
-		IAntrianMapper:    IAntrianMapper,
-	}
-}
-
-func (au *antrianUseCase) GetStatusAntreanUsecase(payload *dto.StatusAntrianRequest, detailPoli antrian.Kpoli) (res dto.StatusAntreanDTO, err error) {
+func (au *antrianUseCase) GetStatusAntreanUsecaseV2(payload *dto.StatusAntrianRequestV2, detailPoli antrian.Kpoli) (res dto.StatusAntreanDTO, err error) {
 
 	detailKTaripDokter, err := au.antrianRepository.DetailTaripDokterByMapingAntrolRepository(payload.KodeDokter)
 
@@ -34,9 +19,9 @@ func (au *antrianUseCase) GetStatusAntreanUsecase(payload *dto.StatusAntrianRequ
 		return res, errors.New("Dokter tidak ditemukan")
 	}
 
-	lastCalled, _ := au.antrianRepository.LastCalledRepository(payload)
+	lastCalled, _ := au.antrianRepository.LastCalledRepositoryV2(payload)
 
-	jmlAntrean, _ := au.antrianRepository.JmlAntreanRepository(payload, detailKTaripDokter.Iddokter)
+	jmlAntrean, _ := au.antrianRepository.JmlAntreanRepositoryV2(payload, detailKTaripDokter.Iddokter)
 
 	antreanPanggil := "-"
 
@@ -79,21 +64,7 @@ func (au *antrianUseCase) GetStatusAntreanUsecase(payload *dto.StatusAntrianRequ
 	return res, nil
 }
 
-func (au *antrianUseCase) GetMobileJknByKodebookingUsecase(req dto.GetSisaAntrianRequest) (res map[string]any, err error) {
-
-	m := map[string]any{}
-
-	result, err := au.antrianRepository.GetMobileJknByKodebookingRepository(req.Kodebooking)
-
-	if err != nil || result.NoAntrian == "" {
-		return res, err
-	}
-
-	return m, nil
-
-}
-
-func (au *antrianUseCase) BatalAntreanUsecase(req dto.BatalAntreanRequest) (isSuccessBatal bool, err error) {
+func (au *antrianUseCase) BatalAntreanUsecaseV2(req dto.BatalAntreanRequestV2) (isSuccessBatal bool, err error) {
 	antrean, err := au.antrianRepository.GetAntreanByKodeBookingRepository(req.Kodebooking)
 
 	if err != nil {
@@ -109,80 +80,7 @@ func (au *antrianUseCase) BatalAntreanUsecase(req dto.BatalAntreanRequest) (isSu
 	return true, nil
 }
 
-func (au *antrianUseCase) CheckedInUsecase(req dto.CheckInRequest) (isSuccess bool, err error) {
-
-	isSuccess = au.antrianRepository.CheckInRepository(req.Kodebooking, req.Waktu)
-
-	if !isSuccess {
-		return false, errors.New("Gagal update")
-	}
-	return true, nil
-}
-
-func (au *antrianUseCase) RegisterPasienBaruUsecase(req dto.RegisterPasienBaruRequest) (res dto.ResPasienBaru, err error) {
-
-	exists := au.antrianRepository.CheckPasienDuplikatRepository(req.Nomorkartu)
-
-	if exists {
-		message := "Data peserta sudah pernah dientrikan"
-		return res, errors.New(message)
-	}
-
-	// GET ID BARU
-	noRm, errs := au.antrianRepository.GetNormPasienRepository()
-
-	if errs != nil {
-		message := "Gagal mendapatkan nomor rekam medis"
-		return res, errors.New(message)
-	}
-
-	var jenisKelamin = ""
-
-	switch req.Jeniskelamin {
-	case "L":
-		jenisKelamin = "Laki-Laki"
-	case "P":
-		jenisKelamin = "Perempuan"
-	default:
-		jenisKelamin = ""
-	}
-
-	tgl, _ := time.Parse("2006-01-02", (req.Tanggallahir))
-	birthDate := time.Date(tgl.Year(), tgl.Month(), tgl.Day(), 0, 0, 0, 0, time.UTC)
-	currentDate := time.Now()
-	ageDuration := currentDate.Sub(birthDate)
-	ageInYears := ageDuration.Hours() / 24 / 365
-
-	var pasien = antrian.Dprofilpasien{
-		Id:           noRm.Norm,
-		Nik:          req.Nik,
-		Nokapst:      req.Nomorkartu,
-		Firstname:    req.Nama,
-		Jeniskelamin: jenisKelamin,
-		Alamat:       req.Alamat,
-		Tgllahir:     req.Tanggallahir,
-		Rtrw:         req.Rt + "/" + req.Rw,
-		Kelurahan:    req.Namakel,
-		Kecamatan:    req.Namakec,
-		Propinsi:     req.Namaprop,
-		Kabupaten:    req.Namadati2,
-		Umurth:       int(ageInYears),
-		Negara:       "Indonesia",
-		Hp:           req.Nohp,
-	}
-
-	newPasien, err2 := au.antrianRepository.InsertPasienBaruDprofilePasien(pasien)
-
-	if err2 != nil {
-		return res, errors.New("Data Gagal disimpan")
-	}
-
-	res.Norm = newPasien.Id
-
-	return res, nil
-}
-
-func (au *antrianUseCase) GetKodeBookingOperasiByNoPesertaUsecase(req dto.JadwalOperasiPasienRequest) (res map[string]any, err error) {
+func (au *antrianUseCase) GetKodeBookingOperasiByNoPesertaUsecaseV2(req dto.JadwalOperasiPasienRequestV2) (res map[string]any, err error) {
 
 	m := map[string]any{}
 
@@ -203,7 +101,7 @@ func (au *antrianUseCase) GetKodeBookingOperasiByNoPesertaUsecase(req dto.Jadwal
 	return m, nil
 }
 
-func (au *antrianUseCase) AmbilAntreanUsecase(req dto.GetAntrianRequest, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
+func (au *antrianUseCase) AmbilAntreanUsecaseV2(req dto.GetAntrianRequestV2, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
 
 	// Validasi nomor antrean hanya boleh diambil
 	// Satu kali pada tanggal dan poli yang sama
@@ -274,26 +172,17 @@ func (au *antrianUseCase) AmbilAntreanUsecase(req dto.GetAntrianRequest, detailP
 	// validasi poli // tutup atau kuota habis
 	checkKuota := au.antrianRepository.CheckKuotaRepository(req.Tanggalperiksa, detailKTaripDokter.Iddokter, kuota)
 
-	fmt.Println("Check Kuota")
-	fmt.Println(checkKuota)
-
 	if !checkKuota {
 		message := fmt.Sprintf("%s sudah tutup, kuota habis", detailPoli.Namapoli)
 		return response, errors.New(message)
 	}
 
-	result, err := au.antrianRepository.InsertAntreanMjknRepository(req, detailKTaripDokter, kuota, detailPoli, detaiProfilPasien)
+	result, err := au.antrianRepository.InsertAntreanMjknRepositoryV2(req, detailKTaripDokter, kuota, detailPoli, detaiProfilPasien)
+
 	if err != nil {
 		log.Fatal(err.Error())
 		return response, err
 	}
 
 	return result, nil
-}
-
-// DATA VALIDATION
-func (au *antrianUseCase) ValidasiDateUsecase(req string) (isTrue bool) {
-	value := "((19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])"
-	re := regexp.MustCompile(value)
-	return re.MatchString(req)
 }

@@ -12,12 +12,14 @@ import (
 	"vincentcoreapi/modules/telegram"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type AntrianHandler struct {
 	AntrianUseCase    entity.AntrianUseCase
 	AntrianRepository entity.AntrianRepository
 	IAntrianMapper    mapper.IAntrianMapper
+	Logging           *logrus.Logger
 }
 
 // SERVICES POST STATUS ANTREAN
@@ -44,7 +46,8 @@ func (ah *AntrianHandler) GetStatusAntrian(c *gin.Context) {
 		return
 	}
 
-	validasi := ah.AntrianUseCase.ValidasiDate(c, payload.TanggalPeriksa)
+	validasi := ah.AntrianUseCase.ValidasiDateUsecase(payload.TanggalPeriksa)
+
 	if !validasi {
 		response := helper.APIResponseFailure("Format Tanggal Tidak Sesuai, format yang benar adalah yyyy-mm-dd", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -64,7 +67,8 @@ func (ah *AntrianHandler) GetStatusAntrian(c *gin.Context) {
 		return
 	}
 
-	detailPoli, err := ah.AntrianRepository.CariPoli(c, payload.KodePoli)
+	detailPoli, err := ah.AntrianRepository.CariPoliRepository(payload.KodePoli)
+
 	if err != nil || detailPoli.Kodepoli == "" {
 		response := helper.APIResponseFailure("Poli tidak ditemukan", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -72,7 +76,8 @@ func (ah *AntrianHandler) GetStatusAntrian(c *gin.Context) {
 		return
 	}
 
-	m, err := ah.AntrianUseCase.GetStatusAntrean(c, payload, detailPoli)
+	m, err := ah.AntrianUseCase.GetStatusAntreanUsecase(payload, detailPoli)
+
 	if err != nil {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -80,7 +85,7 @@ func (ah *AntrianHandler) GetStatusAntrian(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", m)
+	response := helper.APIResponse("Ok", http.StatusOK, m)
 	telegram.RunSuccessMessage("GET STATUS ANTREAN", response, c, data)
 	c.JSON(http.StatusOK, response)
 }
@@ -107,7 +112,7 @@ func (ah *AntrianHandler) GetSisaAntrian(c *gin.Context) {
 		return
 	}
 
-	datas, errs := ah.AntrianRepository.GetSisaAntrean(c, *payload)
+	datas, errs := ah.AntrianRepository.GetSisaAntreanRepository(*payload)
 
 	if errs != nil || datas.Nomorantrean == "" {
 		response := helper.APIResponseFailure(errs.Error(), http.StatusCreated)
@@ -116,7 +121,7 @@ func (ah *AntrianHandler) GetSisaAntrian(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", datas)
+	response := helper.APIResponse("Ok", http.StatusOK, datas)
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("POST SISA ANTREAN", response, c, data)
 
@@ -146,7 +151,8 @@ func (ah *AntrianHandler) BatalAntrean(c *gin.Context) {
 		return
 	}
 
-	isSuccessBatal, err := ah.AntrianUseCase.BatalAntrean(c, *payload)
+	isSuccessBatal, err := ah.AntrianUseCase.BatalAntreanUsecase(*payload)
+
 	if err != nil || !isSuccessBatal {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -183,7 +189,7 @@ func (ah *AntrianHandler) CheckIn(c *gin.Context) {
 		return
 	}
 
-	isSuccess := ah.AntrianRepository.CheckIn(c, payload.Kodebooking, payload.Waktu)
+	isSuccess := ah.AntrianRepository.CheckInRepository(payload.Kodebooking, payload.Waktu)
 	if !isSuccess {
 		response := helper.APIResponseFailure("Gagal update", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -229,7 +235,7 @@ func (ah *AntrianHandler) RegisterPasienBaru(c *gin.Context) {
 	}
 
 	// REGISTRASI PASIEN BARU
-	result, err := ah.AntrianUseCase.RegisterPasienBaru(c, *payload)
+	result, err := ah.AntrianUseCase.RegisterPasienBaruUsecase(*payload)
 	if err != nil || result.Norm == "" {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -237,7 +243,7 @@ func (ah *AntrianHandler) RegisterPasienBaru(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Harap datang ke admisi untuk melengkapi data Rekam Medis", http.StatusOK, "Ok", result)
+	response := helper.APIResponse("Harap datang ke admisi untuk melengkapi data Rekam Medis", http.StatusOK, result)
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("POST PASIEN BARU", response, c, data)
 }
@@ -266,8 +272,8 @@ func (ah *AntrianHandler) GetJadwalOperasi(c *gin.Context) {
 	}
 
 	// CEK FROMAT TANGGAL
-	validasi := ah.AntrianUseCase.ValidasiDate(c, payload.Tanggalakhir)
-	validasi1 := ah.AntrianUseCase.ValidasiDate(c, payload.Tanggalawal)
+	validasi := ah.AntrianUseCase.ValidasiDateUsecase(payload.Tanggalakhir)
+	validasi1 := ah.AntrianUseCase.ValidasiDateUsecase(payload.Tanggalawal)
 	if !validasi || !validasi1 {
 		response := helper.APIResponseFailure("Format Tanggal (YYYY-MM-DD)", http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -288,7 +294,7 @@ func (ah *AntrianHandler) GetJadwalOperasi(c *gin.Context) {
 	}
 
 	m := map[string]any{}
-	jadwalOperasi, err := ah.AntrianRepository.GetJadwalOperasi(c, payload.Tanggalawal, payload.Tanggalakhir)
+	jadwalOperasi, err := ah.AntrianRepository.GetJadwalOperasiRepository(payload.Tanggalawal, payload.Tanggalakhir)
 	if err != nil || len(jadwalOperasi) == 0 {
 		message := fmt.Sprintf("Tidak ada jadwal operasi pada tanggal %s sampai %s", payload.Tanggalawal, payload.Tanggalakhir)
 		response := helper.APIResponseFailure(message, http.StatusCreated)
@@ -297,10 +303,10 @@ func (ah *AntrianHandler) GetJadwalOperasi(c *gin.Context) {
 		return
 	}
 
-	jadwalOperasiMapper := ah.IAntrianMapper.ToJadwalOperasiDTO(jadwalOperasi, false)
+	jadwalOperasiMapper := ah.IAntrianMapper.ToJadwalOperasiDTOMapper(jadwalOperasi, false)
 	m["list"] = jadwalOperasiMapper
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", m)
+	response := helper.APIResponse("Ok", http.StatusOK, m)
 	telegram.RunSuccessMessage("POST GET JADWAL OPERASI", response, c, data)
 	c.JSON(http.StatusOK, response)
 
@@ -318,7 +324,6 @@ func (ah *AntrianHandler) GetJadwalOperasi(c *gin.Context) {
 // @Failure      	201  		{array}  	helper.FailureResponse
 // @Router			/list-jadwal-operasi	[post]
 func (ah *AntrianHandler) GetKodeBookingOperasi(c *gin.Context) {
-
 	payload := new(dto.JadwalOperasiPasienRequest)
 	err := c.ShouldBindJSON(&payload)
 
@@ -330,7 +335,7 @@ func (ah *AntrianHandler) GetKodeBookingOperasi(c *gin.Context) {
 		return
 	}
 
-	jadwalOperasi, err := ah.AntrianUseCase.GetKodeBookingOperasiByNoPeserta(c, *payload)
+	jadwalOperasi, err := ah.AntrianUseCase.GetKodeBookingOperasiByNoPesertaUsecase(*payload)
 
 	if err != nil {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
@@ -339,7 +344,7 @@ func (ah *AntrianHandler) GetKodeBookingOperasi(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", jadwalOperasi)
+	response := helper.APIResponse("Ok", http.StatusOK, jadwalOperasi)
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("POST JADWAL OPERASI", response, c, data)
 }
@@ -367,7 +372,8 @@ func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 		return
 	}
 
-	detaiProfilPasien, err := ah.AntrianRepository.CheckMedrek(c, payload.Nik)
+	detaiProfilPasien, err := ah.AntrianRepository.CheckMedrekRepository(payload.Nik)
+
 	if err != nil || detaiProfilPasien.Id == "" {
 		message := fmt.Sprintf("%s belum terdaftar rekam medis, silahkan daftar terlebih dahulu", payload.Nomorkartu)
 		response := helper.APIResponseFailure(message, http.StatusAccepted)
@@ -376,7 +382,8 @@ func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 		return
 	}
 
-	detailPoli, err := ah.AntrianRepository.CariPoli(c, payload.Kodepoli)
+	detailPoli, err := ah.AntrianRepository.CariPoliRepository(payload.Kodepoli)
+
 	if err != nil || detailPoli.Kodepoli == "" {
 		message := fmt.Sprintf("%s kode poli tersebut tidak ditemukan", payload.Kodepoli)
 		response := helper.APIResponseFailure(message, http.StatusCreated)
@@ -385,7 +392,7 @@ func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 		return
 	}
 
-	result, err := ah.AntrianUseCase.AmbilAntrean(c, *payload, detailPoli, detaiProfilPasien)
+	result, err := ah.AntrianUseCase.AmbilAntreanUsecase(*payload, detailPoli, detaiProfilPasien)
 	if err != nil {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -393,59 +400,7 @@ func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", result)
+	response := helper.APIResponse("Ok", http.StatusOK, result)
 	c.JSON(http.StatusOK, response)
 	telegram.RunSuccessMessage("POST AMBIL ANTREAN", response, c, data)
-}
-
-func (ah *AntrianHandler) CheckAntrean(c *gin.Context) {
-
-	err := ah.AntrianUseCase.RepairAntrian(c)
-
-	if err != nil {
-		response := helper.APIResponseFailure("data gagal diproses", http.StatusCreated)
-		c.JSON(http.StatusCreated, response)
-		return
-	}
-
-	response := helper.APIResponseFailure("Antrian Billing rajal berhasil dihapus", http.StatusOK)
-	c.JSON(http.StatusOK, response)
-}
-
-func (ah *AntrianHandler) HapusAntrian(c *gin.Context) {
-	payload := new(dto.ResNoRM)
-	err := c.ShouldBindJSON(&payload)
-	data, _ := json.Marshal(payload)
-
-	if err != nil {
-		response := helper.APIResponseFailure("data tidak boleh ada yang null!", http.StatusCreated)
-		c.JSON(http.StatusCreated, response)
-		telegram.RunFailureMessage("POST AMBIL ANTREAN", response, c, data)
-		return
-	}
-
-	antrian := []string{"antriankmbersalin", "antriankmoperasi", "antrianpenmedik",
-		"antrianpoli", "antrianpolianak", "antrianpolibedah", "antrianpolidalam",
-		"antrianpoligigi", "antrianpolijantung", "antrianpolijiwa", "antrianpolikia",
-		"antrianpolimata", "antrianpoliobgyn", "antrianpoliorto", "antrianpoliparu",
-		"antrianpolisyaraf", "antrianpolitht", "antrianpoliugd", "kbangsalkasur"}
-
-	for _, V := range antrian {
-		data, err := ah.AntrianRepository.HapusAntrian(c, V, payload.Norm)
-
-		if err != nil {
-			response := helper.APIResponseFailure("data gagal diproses", http.StatusCreated)
-			c.JSON(http.StatusCreated, response)
-			return
-		}
-
-		if data.Noreg != "" {
-			datas, _ := ah.AntrianRepository.DeleteAntrian(c, V, payload.Norm)
-			message := fmt.Sprintf("Antrian dengan %s berhasil dihapus ", datas.Noreg)
-
-			response := helper.APIResponse(message, http.StatusOK, "Success", datas)
-			c.JSON(http.StatusOK, response)
-		}
-	}
-
 }

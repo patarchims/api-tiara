@@ -17,7 +17,6 @@ type FailureResponse struct {
 type Meta struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
-	// Status  string `json:"status"`
 }
 
 func APIResponseFailure(message string, code int) FailureResponse {
@@ -33,7 +32,7 @@ func APIResponseFailure(message string, code int) FailureResponse {
 	return jsonResponse
 }
 
-func APIResponse(message string, code int, status string, data interface{}) Response {
+func APIResponse(message string, code int, data interface{}) Response {
 	meta := Meta{
 		Message: message,
 		Code:    code,

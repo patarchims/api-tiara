@@ -10,12 +10,14 @@ import (
 	"vincentcoreapi/modules/telegram"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type FarmasiHandler struct {
 	FarmasiUseCase    entity.FarmasiUseCase
 	FarmasiRepository entity.FarmasiRepository
 	IFarmasiMapper    mapper.IFarmasiMapper
+	Logging           *logrus.Logger
 }
 
 // SERVICES POST STATUS ANTREAN
@@ -44,7 +46,7 @@ func (ah *FarmasiHandler) AmbilAntreanFarmasi(c *gin.Context) {
 	}
 
 	// AMBIL ANTREAN USECASE
-	farmasi, err := ah.FarmasiUseCase.AmbilAntreanFarmasi(c, *payload)
+	farmasi, err := ah.FarmasiUseCase.AmbilAntreanFarmasiUsecase(*payload)
 	if err != nil || farmasi.JenisResep == "" {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -52,7 +54,7 @@ func (ah *FarmasiHandler) AmbilAntreanFarmasi(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", farmasi)
+	response := helper.APIResponse("Ok", http.StatusOK, farmasi)
 	telegram.RunSuccessMessage("AMBIL ANTREAN FARMASI", response, c, data)
 	c.JSON(http.StatusOK, response)
 
@@ -81,7 +83,8 @@ func (ah *FarmasiHandler) StatusAntreanFarmasi(c *gin.Context) {
 		return
 	}
 
-	status, err := ah.FarmasiUseCase.StatusAntreanFarmasi(c, *payload)
+	status, err := ah.FarmasiUseCase.StatusAntreanFarmasiUsecase(*payload)
+
 	if err != nil || status.JenisResep == "" {
 		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
 		c.JSON(http.StatusCreated, response)
@@ -90,8 +93,7 @@ func (ah *FarmasiHandler) StatusAntreanFarmasi(c *gin.Context) {
 	}
 
 	// MAPPER
-	response := helper.APIResponse("Ok", http.StatusOK, "Ok", status)
+	response := helper.APIResponse("Ok", http.StatusOK, status)
 	telegram.RunSuccessMessage("STATUS ANTREAN FARMASI", response, c, data)
 	c.JSON(http.StatusOK, response)
-
 }

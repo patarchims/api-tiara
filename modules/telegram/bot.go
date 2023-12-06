@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -60,7 +59,7 @@ func SendMessageTelegram(method string, response helper.Response, request string
 		panic(err)
 	}
 	defer responseLoc.Body.Close()
-	ipLoc, _ := ioutil.ReadAll(responseLoc.Body)
+	ipLoc, _ := io.ReadAll(responseLoc.Body)
 
 	s, err := getStations([]byte(ipLoc))
 
@@ -77,7 +76,7 @@ func SendMessageFailureTelegram(method string, response helper.FailureResponse, 
 		panic(err)
 	}
 	defer responseLoc.Body.Close()
-	ipLoc, _ := ioutil.ReadAll(responseLoc.Body)
+	ipLoc, _ := io.ReadAll(responseLoc.Body)
 
 	s, err := getStations([]byte(ipLoc))
 

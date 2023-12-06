@@ -31,7 +31,7 @@ func (ah *TranferHandler) UploadFile(c *gin.Context) {
 		log.Error().Msg(err.Error())
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Data gagal diproses", http.StatusAccepted, "error", errorMessage)
+		response := helper.APIResponse("Data gagal diproses", http.StatusAccepted, errorMessage)
 		c.JSON(http.StatusAccepted, response)
 		return
 	}
@@ -42,6 +42,7 @@ func (ah *TranferHandler) UploadFile(c *gin.Context) {
 	path := fmt.Sprintf("files/%s.%s", tipe[0], tipe[1])
 
 	err = c.SaveUploadedFile(file, path)
+
 	if err != nil {
 		log.Info().Msg(err.Error())
 		response := helper.APIResponseFailure("File gagal diupload", http.StatusCreated)
@@ -51,7 +52,7 @@ func (ah *TranferHandler) UploadFile(c *gin.Context) {
 
 	data := dto.DTOTransferFileResponse{FileName: path}
 
-	response := helper.APIResponse("Data berhasil disimpan", http.StatusOK, "OK", data)
+	response := helper.APIResponse("Data berhasil disimpan", http.StatusOK, data)
 	log.Info().Msg("Data berhasil disimpan")
 	c.JSON(http.StatusOK, response)
 

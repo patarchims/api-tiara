@@ -51,10 +51,10 @@ func (s *Service) RoutingAndListen() {
 	apiProtected.POST("/status-antrean-farmasi", s.FarmasiHandler.StatusAntreanFarmasi)
 
 	// ========================== CHECK ANTREAN
-	apiPublic.POST("/check-antrean", s.AntrianHandler.CheckAntrean)
+	// apiPublic.POST("/check-antrean", s.AntrianHandler.CheckAntrean)
 
 	// ========================== CHECK ANTREAN YANG NYANGKUT
-	apiProtected.POST("/hapus-antrean", s.AntrianHandler.HapusAntrian)
+	// apiProtected.POST("/hapus-antrean", s.AntrianHandler.HapusAntrian)
 
 	// ==========================
 	api.GET("api/prod/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
