@@ -203,6 +203,11 @@ func (ar *antrianRepository) GetSisaAntreanRepository(req dto.GetSisaAntrianRequ
 		return res, errors.New("Antrean dengan kode booking tersebut tidak ditemukan")
 	}
 
+	// PENAMBAHAN STATUS BATAL
+	if kodeBook.Status == "batal" {
+		return res, errors.New("antrean dengan kode booking tersebut sudah dibatalkan")
+	}
+
 	type SisaAntrean struct {
 		Sisaantrean    int    `json:"sisa_antrean"`
 		Antrianpanggil string `json:"antrian_panggil"`

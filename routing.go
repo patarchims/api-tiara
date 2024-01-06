@@ -8,11 +8,6 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-
-	_ "vincentcoreapi/docs"
-
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // ROUTING APPLICATION
@@ -50,19 +45,7 @@ func (s *Service) RoutingAndListen() {
 	apiProtected.POST("/ambil-antrean-farmasi", s.FarmasiHandler.AmbilAntreanFarmasi)
 	apiProtected.POST("/status-antrean-farmasi", s.FarmasiHandler.StatusAntreanFarmasi)
 
-	// ========================== CHECK ANTREAN
-	// apiPublic.POST("/check-antrean", s.AntrianHandler.CheckAntrean)
-
-	// ========================== CHECK ANTREAN YANG NYANGKUT
-	// apiProtected.POST("/hapus-antrean", s.AntrianHandler.HapusAntrian)
-
 	// ==========================
-	api.GET("api/prod/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-
-	ginSwagger.WrapHandler(swaggerfiles.Handler,
-		ginSwagger.URL("http://localhost:6060/swagger/doc.json"),
-		ginSwagger.DefaultModelsExpandDepth(-1))
-
 	// RUN SERVER
 	router.Run(os.Getenv("DEPLOY_PORT"))
 

@@ -89,6 +89,7 @@ type (
 		Tujuan            string    `json:"tujuan"`
 		Namadokter        string    `json:"namadokter"`
 		MapingAntrol      string    `json:"maping_antrol"`
+		Status            string    `json:"status" bson:"status"`
 	}
 
 	StatusAntreanDTO struct {
