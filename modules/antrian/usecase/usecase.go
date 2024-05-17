@@ -26,6 +26,31 @@ func NewAntrianUseCase(ar entity.AntrianRepository, IAntrianMapper mapper.IAntri
 	}
 }
 
+func (au *antrianUseCase) BatalAllAntreanUsecaseV2(req dto.BatalAntreanRequestV2) (isSuccessBatal bool, err error) {
+	// PARSING ALL DATA PADA REQUEST
+
+	// AMBIL OBSERVASI
+	kodeBook := strings.Split(req.Kodebooking, ",")
+
+	for _, kode := range kodeBook {
+		if kode != "" {
+			antrean, err := au.antrianRepository.GetAntreanByKodeBookingRepository(kode)
+
+			if err != nil {
+				return false, err
+			}
+
+			isSuccess := au.antrianRepository.BatalAntreanRepository(antrean.NoBook, req.Keterangan)
+
+			if !isSuccess {
+				return false, errors.New("data gagal diupdate")
+			}
+		}
+	}
+
+	return true, nil
+}
+
 func (au *antrianUseCase) GetStatusAntreanUsecase(payload *dto.StatusAntrianRequest, detailPoli antrian.Kpoli) (res dto.StatusAntreanDTO, err error) {
 
 	detailKTaripDokter, err := au.antrianRepository.DetailTaripDokterByMapingAntrolRepository(payload.KodeDokter)

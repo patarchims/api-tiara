@@ -312,17 +312,6 @@ func (ah *AntrianHandler) GetJadwalOperasi(c *gin.Context) {
 
 }
 
-// GetKodeBookingOperasi
-// @Summary			Get List Jadwal Operasi Pasien Pasien
-// @Description		Get List Jadwal Operasi Pasien Pasien
-// @Tags			Antrean
-// @Accept			json
-// @Produce			json
-// @Security BasicAuth
-// @Param			jadwal-operasi-pasien	body		dto.JadwalOperasiPasienRequest	true	"Get Booking Operasi"
-// @Success			200			{object}  	helper.Response
-// @Failure      	201  		{array}  	helper.FailureResponse
-// @Router			/list-jadwal-operasi	[post]
 func (ah *AntrianHandler) GetKodeBookingOperasi(c *gin.Context) {
 	payload := new(dto.JadwalOperasiPasienRequest)
 	err := c.ShouldBindJSON(&payload)
@@ -349,17 +338,6 @@ func (ah *AntrianHandler) GetKodeBookingOperasi(c *gin.Context) {
 	telegram.RunSuccessMessage("POST JADWAL OPERASI", response, c, data)
 }
 
-// AMBIL ANTRIAN
-// @Summary			Ambil Antrean Pasien
-// @Description		Ambil Antrean Pasien
-// @Tags			Antrean
-// @Accept			json
-// @Produce			json
-// @Security BasicAuth
-// @Param			antrian-pasien	body		dto.GetAntrianRequest	true	"Get Antrean Pasien Request"
-// @Success			200			{object}  	dto.InsertPasienDTO
-// @Failure      	201  		{array}  	helper.FailureResponse
-// @Router			/ambil-antrean	[post]
 func (ah *AntrianHandler) AmbilAntrean(c *gin.Context) {
 	payload := new(dto.GetAntrianRequest)
 	err := c.ShouldBindJSON(&payload)

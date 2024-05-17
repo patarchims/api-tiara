@@ -15,6 +15,7 @@ import (
 	handlerUser "vincentcoreapi/modules/user/handler"
 	repositoryUser "vincentcoreapi/modules/user/repository"
 	userUseCase "vincentcoreapi/modules/user/usecase"
+	"vincentcoreapi/pkg/logs"
 
 	"github.com/joho/godotenv"
 
@@ -38,6 +39,7 @@ func RunApplication() {
 	}
 
 	db := config.InitMysqlDB()
+	logging := logs.NewLogger()
 
 	repoUser := repositoryUser.NewUserRepository(db)
 	repoAntrian := repositoryAntrian.NewAntrianRepository(db)
@@ -66,5 +68,5 @@ func RunApplication() {
 	}
 
 	// ROUTING APP
-	service.RoutingAndListen()
+	service.RoutingFiberAndListener(logging)
 }

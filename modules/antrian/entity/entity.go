@@ -19,6 +19,7 @@ type AntrianUseCase interface {
 	GetStatusAntreanUsecaseV2(payload *dto.StatusAntrianRequestV2, detailPoli antrian.Kpoli) (res dto.StatusAntreanDTO, err error)
 	BatalAntreanUsecaseV2(req dto.BatalAntreanRequestV2) (isSuccessBatal bool, err error)
 	GetKodeBookingOperasiByNoPesertaUsecaseV2(req dto.JadwalOperasiPasienRequestV2) (res map[string]any, err error)
+	BatalAllAntreanUsecaseV2(req dto.BatalAntreanRequestV2) (isSuccessBatal bool, err error)
 }
 
 // AntrianRepository

@@ -97,6 +97,29 @@ func (ah *AntrianHandler) GetSisaAntrianFiberHandler(c *fiber.Ctx) error {
 
 }
 
+func (ah *AntrianHandler) BatalAllAntreanFiberHandler(c *fiber.Ctx) error {
+	payload := new(dto.BatalAntreanRequestV2)
+	errs := c.BodyParser(&payload)
+
+	if errs != nil {
+		response := helper.APIResponseFailure("Data tidak boleh ada yang null!", http.StatusCreated)
+		ah.Logging.Info(response)
+		return c.Status(fiber.StatusCreated).JSON(response)
+	}
+
+	isSuccessBatal, err := ah.AntrianUseCase.BatalAllAntreanUsecaseV2(*payload)
+
+	if err != nil || !isSuccessBatal {
+		response := helper.APIResponseFailure(err.Error(), http.StatusCreated)
+		ah.Logging.Info(response)
+		return c.Status(fiber.StatusCreated).JSON(response)
+	}
+
+	response := helper.APIResponseFailure("Ok", http.StatusOK)
+	ah.Logging.Info(response)
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
 func (ah *AntrianHandler) BatalAntreanFiberHandler(c *fiber.Ctx) error {
 	payload := new(dto.BatalAntreanRequestV2)
 	errs := c.BodyParser(&payload)

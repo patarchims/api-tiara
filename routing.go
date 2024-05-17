@@ -46,7 +46,6 @@ func (s *Service) RoutingAndListen() {
 	apiProtected.POST("/status-antrean-farmasi", s.FarmasiHandler.StatusAntreanFarmasi)
 
 	// ==========================
-	// RUN SERVER
 	router.Run(os.Getenv("DEPLOY_PORT"))
 
 }

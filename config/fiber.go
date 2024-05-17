@@ -9,7 +9,6 @@ import (
 
 func NewFiberConfig() fiber.Config {
 	return fiber.Config{
-
 		JSONEncoder:   json.Marshal,
 		JSONDecoder:   json.Unmarshal,
 		ErrorHandler:  exception.ErrorHandler,
