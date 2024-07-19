@@ -488,17 +488,13 @@ func (ar *antrianRepository) CheckMedrekRepository(nik string) (dprofilpasien an
 
 func (ar *antrianRepository) InsertAntreanMjknRepository(req dto.GetAntrianRequest, detailKTaripDokter antrian.KtaripDokter, kotaHariIni int, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
 
-	// TODO : RS
-	// CHANGE RSHP :> RS HARAPAN
-
 	query1 := `
 		SELECT COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001') AS no_antre,
-			CONCAT('RSHP-', ? ,'-',REPLACE(?,'-',''),COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001')) AS kobook,
+			CONCAT('RSTP-', ? ,'-',REPLACE(?,'-',''),COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001')) AS kobook,
 			? AS date
 		FROM rekam.antrian_ol
 		WHERE tgl_periksa = ?
 		AND kd_dokter = ?
-
 	`
 	type Result1 struct {
 		NoAntre string

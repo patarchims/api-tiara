@@ -95,7 +95,6 @@ func (ar *antrianRepository) GetSisaAntreanRepositoryV2(req dto.GetSisaAntrianRe
 func (ar *antrianRepository) InsertAntreanMjknRepositoryV2(req dto.GetAntrianRequestV2, detailKTaripDokter antrian.KtaripDokter, kotaHariIni int, detailPoli antrian.Kpoli, detaiProfilPasien antrian.Dprofilpasien) (response dto.InsertPasienDTO, err error) {
 
 	// TODO : RS
-	// CHANGE RSHP :> RS HARAPAN
 
 	query1 := `
 		SELECT COALESCE(LPAD(CONVERT(@last_no_antrian :=MAX(no_antrian),SIGNED INTEGER)+1,3,0),'001') AS no_antre,
