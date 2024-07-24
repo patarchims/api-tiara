@@ -58,8 +58,6 @@ func (ah *AntrianHandler) GetSisaAntrianFiberHandler(c *fiber.Ctx) error {
 	payload := new(dto.GetSisaAntrianRequestV2)
 	errs := c.BodyParser(&payload)
 
-	// data, _ := json.Marshal(payload)
-
 	if errs != nil {
 		response := helper.APIResponseFailure("Data tidak boleh ada yang null!", http.StatusCreated)
 		return c.Status(fiber.StatusCreated).JSON(response)
